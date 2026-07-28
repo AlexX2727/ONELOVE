@@ -72,7 +72,7 @@ const LAYOUT_IMPORTS = [
   `]
 })
 export class LayoutComponent {
-  sidebarCollapsed = false;
+  sidebarCollapsed = window.innerWidth <= 768;
 
   toggleSidebar() {
     this.sidebarCollapsed = !this.sidebarCollapsed;
