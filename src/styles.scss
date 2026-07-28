@@ -87,7 +87,13 @@
   // Text
   --text-primary:   #111111;
   --text-secondary: rgba(0, 0, 0, 0.65);
-  --text-muted:     rgba(0, 0, 0, 0.38);
+  --text-muted:     rgba(0, 0, 0, 0.45);
+  --text-accent:    #C2477B; // Darker pink for text
+
+  // Branding Colors for better contrast on white
+  --accent:         #D65A92;
+  --accent-dark:    #B53E74;
+  --gold:           #B68A40;
 
   // Shadows (lighter for light bg)
   --shadow-sm:     0 2px 8px rgba(0, 0, 0, 0.08);
@@ -955,57 +961,57 @@ h4, h5, h6 { font-family: 'Inter', sans-serif; font-weight: 600; }
   .hide-mobile { display: none !important; }
 }
 
- / /   = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
- / /   R E S P O N S I V E   D E S I G N   ( M O B I L E ) 
- / /   = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
- @ m e d i a   ( m a x - w i d t h :   7 6 8 p x )   { 
-     / *   S i d e b a r   O f f - c a n v a s   * / 
-     . s i d e b a r   { 
-         t r a n s f o r m :   t r a n s l a t e X ( - 1 0 0 % ) ; 
-         w i d t h :   2 6 0 p x   ! i m p o r t a n t ; 
-         b o x - s h a d o w :   4 p x   0   2 4 p x   r g b a ( 0 , 0 , 0 , 0 . 5 ) ; 
-     } 
-     . a p p - s h e l l : n o t ( . s i d e b a r - c o l l a p s e d )   . s i d e b a r   { 
-         t r a n s f o r m :   t r a n s l a t e X ( 0 ) ; 
-     } 
-     
-     / *   G r i d s   c o l l a p s e   t o   s i n g l e   c o l u m n   * / 
-     . g r i d ,   . g r i d - 2 ,   . g r i d - 3 ,   . g r i d - 4   { 
-         g r i d - t e m p l a t e - c o l u m n s :   1 f r   ! i m p o r t a n t ; 
-     } 
-     
-     / *   H e a d e r s   a n d   T o p b a r   * / 
-     . p a g e - h e a d e r   { 
-         f l e x - d i r e c t i o n :   c o l u m n ; 
-         a l i g n - i t e m s :   f l e x - s t a r t ; 
-         g a p :   1 6 p x ; 
-     } 
-     . p a g e - h e a d e r   . f l e x   { 
-         w i d t h :   1 0 0 % ; 
-         j u s t i f y - c o n t e n t :   s p a c e - b e t w e e n ; 
-     } 
-     . t o p b a r   { 
-         f l e x - d i r e c t i o n :   c o l u m n ; 
-         h e i g h t :   a u t o   ! i m p o r t a n t ; 
-         p a d d i n g :   1 2 p x   2 0 p x ; 
-         g a p :   1 2 p x ; 
-     } 
-     . t o p b a r - l e f t ,   . t o p b a r - r i g h t   { 
-         w i d t h :   1 0 0 % ; 
-         j u s t i f y - c o n t e n t :   s p a c e - b e t w e e n ; 
-     } 
-     . s e a r c h - w r a p p e r   { 
-         w i d t h :   1 0 0 %   ! i m p o r t a n t ; 
-     } 
-     
-     / *   H i d e   t e x t   i n   t o p b a r   b u t t o n s   t o   s a v e   s p a c e   * / 
-     . t h e m e - l a b e l ,   . t o p b a r - a c t i o n   . u s e r - n a m e   { 
-         d i s p l a y :   n o n e ; 
-     } 
-     
-     / *   M o d a l   r e s p o n s i v e   * / 
-     . m o d a l   { 
-         p a d d i n g :   2 0 p x ; 
-     } 
- }  
- 
+// ============================================
+// RESPONSIVE DESIGN (MOBILE)
+// ============================================
+@media (max-width: 768px) {
+  /* Sidebar Off-canvas */
+  .sidebar {
+    transform: translateX(-100%);
+    width: 260px !important;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.5);
+  }
+  .app-shell:not(.sidebar-collapsed) .sidebar {
+    transform: translateX(0);
+  }
+  
+  /* Grids collapse to single column */
+  .grid, .grid-2, .grid-3, .grid-4 {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Headers and Topbar */
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .page-header .flex {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .topbar {
+    flex-direction: column;
+    height: auto !important;
+    padding: 12px 20px;
+    gap: 12px;
+  }
+  .topbar-left, .topbar-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .search-wrapper {
+    width: 100% !important;
+  }
+  
+  /* Hide text in topbar buttons to save space */
+  .theme-label, .topbar-action .user-name {
+    display: none;
+  }
+  
+  /* Modal responsive */
+  .modal {
+    padding: 20px;
+  }
+}
+
