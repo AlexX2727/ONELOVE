@@ -230,22 +230,21 @@ export class ReportesComponent implements OnInit, AfterViewInit {
   }
 
   exportarReporte() {
-    const html = `
-      <div style="margin-bottom: 20px;">
-        <h2>KPIs Generales</h2>
-        <table>
-          <tr>${this.kpis.map(k => `<th>${k.label}</th>`).join('')}</tr>
-          <tr>${this.kpis.map(k => `<td>$${k.value} (${k.growth}%)</td>`).join('')}</tr>
-        </table>
-      </div>
-      <div style="margin-bottom: 20px;">
-        <h2>Top Productos</h2>
-        <table>
-          <tr><th>Producto</th><th>Unidades</th><th>Ingresos</th></tr>
-          ${this.topProducts.map(p => `<tr><td>${p.name}</td><td>${p.units}</td><td>$${p.revenue}</td></tr>`).join('')}
-        </table>
-      </div>
-    `;
-    this.exportService.exportHTMLReport('Reporte Ejecutivo ONE LOVE', html, 'reporte_onelove');
+    const kpisData = this.kpis.map(k => ({
+      Métrica: k.label,
+      Valor: `$${k.value}`,
+      Crecimiento: `${k.growth}%`
+    }));
+
+    const topProductsData = this.topProducts.map(p => ({
+      Producto: p.name,
+      Unidades: p.units,
+      Ingresos: `$${p.revenue}`
+    }));
+
+    this.exportService.exportCustomPDF('Reporte Ejecutivo ONE LOVE', [
+      { title: 'KPIs Generales', data: kpisData },
+      { title: 'Top Productos', data: topProductsData }
+    ], 'reporte_onelove');
   }
 }

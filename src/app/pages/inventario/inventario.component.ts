@@ -281,7 +281,7 @@ export class InventarioComponent implements OnInit {
       'Colores': p.colors.join(', '),
       'Estado': p.status
     }));
-    this.exportService.exportCSV(data, 'inventario_onelove');
-    this.toast.success('Inventario exportado a CSV');
+    this.exportService.exportExcel(data, 'inventario_onelove');
+    this.toast.success('Inventario exportado a Excel');
   }
 }

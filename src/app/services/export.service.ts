@@ -1,77 +1,108 @@
 import { Injectable } from '@angular/core';
+import * as XLSX from 'xlsx';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 @Injectable({ providedIn: 'root' })
 export class ExportService {
 
-  /** Download data as CSV */
-  exportCSV(data: Record<string, unknown>[], filename: string): void {
-    if (!data.length) return;
+  /** Download data as Excel (.xlsx) */
+  exportExcel(data: Record<string, unknown>[], filename: string): void {
+    if (!data || !data.length) return;
+    
+    // Format dates to locale string before exporting
+    const formattedData = data.map(row => {
+      const newRow: Record<string, unknown> = {};
+      for (const key in row) {
+        newRow[key] = row[key] instanceof Date 
+          ? (row[key] as Date).toLocaleDateString('es-EC') 
+          : row[key];
+      }
+      return newRow;
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(formattedData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Reporte');
+    XLSX.writeFile(workbook, `${filename}.xlsx`);
+  }
+
+  /** Generate and download a PDF report with tables */
+  exportPDF(title: string, data: Record<string, unknown>[], filename: string): void {
+    if (!data || !data.length) return;
+
+    const doc = new jsPDF();
+    
+    // Title
+    doc.setFontSize(18);
+    doc.setTextColor(26, 26, 46); // Brand primary
+    doc.text(`ONE LOVE — ${title}`, 14, 22);
+    
+    // Subtitle
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Generado el ${new Date().toLocaleDateString('es-EC')} a las ${new Date().toLocaleTimeString('es-EC')}`, 14, 30);
+
     const headers = Object.keys(data[0]);
-    const csvRows = [
-      headers.join(','),
-      ...data.map(row =>
-        headers.map(h => {
-          const val = row[h] ?? '';
-          const str = val instanceof Date
-            ? val.toLocaleDateString('es-EC')
-            : String(val).replace(/"/g, '""');
-          return `"${str}"`;
-        }).join(',')
-      )
-    ];
-    this.download(csvRows.join('\n'), `${filename}.csv`, 'text/csv;charset=utf-8;');
+    const rows = data.map(row => 
+      headers.map(h => {
+        const val = row[h];
+        return val instanceof Date ? val.toLocaleDateString('es-EC') : String(val ?? '');
+      })
+    );
+
+    autoTable(doc, {
+      head: [headers],
+      body: rows,
+      startY: 38,
+      theme: 'grid',
+      headStyles: { fillColor: [26, 26, 46], textColor: 255 }, // Brand colors
+      alternateRowStyles: { fillColor: [248, 248, 248] },
+      styles: { fontSize: 8 }
+    });
+
+    doc.save(`${filename}.pdf`);
   }
 
-  /** Download data as formatted JSON */
-  exportJSON(data: unknown, filename: string): void {
-    this.download(JSON.stringify(data, null, 2), `${filename}.json`, 'application/json');
-  }
+  /** Export specific custom report for Dashboard/KPIs (replaces the HTML one) */
+  exportCustomPDF(title: string, sections: {title: string, data: Record<string, unknown>[]}[], filename: string): void {
+    const doc = new jsPDF();
+    
+    doc.setFontSize(18);
+    doc.setTextColor(26, 26, 46);
+    doc.text(`ONE LOVE — ${title}`, 14, 22);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Generado el ${new Date().toLocaleDateString('es-EC')}`, 14, 30);
 
-  /** Generate and download a simple HTML report as a print-ready page */
-  exportHTMLReport(title: string, html: string, filename: string): void {
-    const page = `<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<title>${title}</title>
-<style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family: Arial, sans-serif; font-size: 12px; padding: 20px; color: #222; }
-  h1 { font-size: 20px; margin-bottom: 4px; color: #1a1a2e; }
-  .subtitle { color: #666; margin-bottom: 20px; font-size: 11px; }
-  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-  th { background: #1a1a2e; color: white; padding: 8px 10px; text-align: left; font-size: 11px; }
-  td { padding: 7px 10px; border-bottom: 1px solid #eee; font-size: 11px; }
-  tr:nth-child(even) td { background: #f8f8f8; }
-  .badge { padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; }
-  .badge-success { background: #e8f5e9; color: #2e7d32; }
-  .badge-warning { background: #fff8e1; color: #f57f17; }
-  .badge-danger { background: #fce4ec; color: #c62828; }
-  .footer { margin-top: 20px; font-size: 10px; color: #999; text-align: right; }
-  @media print { .no-print { display: none; } }
-</style>
-</head>
-<body>
-  <h1>ONE LOVE — ${title}</h1>
-  <p class="subtitle">Generado el ${new Date().toLocaleDateString('es-EC', { dateStyle: 'full' })} a las ${new Date().toLocaleTimeString('es-EC')}</p>
-  ${html}
-  <div class="footer">ONE LOVE Sistema de Gestión · Ecuador 🇪🇨</div>
-  <script>setTimeout(() => window.print(), 500);</script>
-</body>
-</html>`;
-    this.download(page, `${filename}.html`, 'text/html;charset=utf-8;');
-  }
+    let startY = 40;
 
-  private download(content: string, filename: string, mimeType: string): void {
-    const blob = new Blob(['\ufeff' + content], { type: mimeType }); // BOM for Excel UTF-8
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    for (const sec of sections) {
+      if (!sec.data || !sec.data.length) continue;
+      
+      doc.setFontSize(14);
+      doc.setTextColor(26, 26, 46);
+      doc.text(sec.title, 14, startY);
+      
+      const headers = Object.keys(sec.data[0]);
+      const rows = sec.data.map(row => 
+        headers.map(h => String(row[h] ?? ''))
+      );
+
+      autoTable(doc, {
+        head: [headers],
+        body: rows,
+        startY: startY + 5,
+        theme: 'grid',
+        headStyles: { fillColor: [26, 26, 46], textColor: 255 },
+        styles: { fontSize: 8 },
+        margin: { bottom: 20 }
+      });
+
+      startY = (doc as any).lastAutoTable.finalY + 15;
+    }
+
+    doc.save(`${filename}.pdf`);
   }
 }
