@@ -446,7 +446,7 @@ export class VentasComponent implements OnInit {
       'Estado del Pedido': this.getOrderLabel(o.status),
       'Fecha': o.createdAt
     }));
-    this.exportService.exportExcel(data, 'ventas_onelove');
-    this.toast.success('Ventas exportadas a Excel');
+    this.exportService.exportCSV(data, 'ventas_onelove');
+    this.toast.success('Ventas exportadas a CSV');
   }
 }

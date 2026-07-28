@@ -337,29 +337,31 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   }
 
   exportarDashboard() {
-    const resumenData = [{
-      'Ventas del Mes': `$${this.stats.monthlySales} (${this.stats.salesGrowth}%)`,
-      'Pedidos del Mes': `${this.stats.monthlyOrders} (${this.stats.ordersGrowth}%)`,
-      'Total Clientes': `${this.stats.totalCustomers} (${this.stats.customersGrowth}%)`,
-      'Pedidos Pendientes': this.stats.pendingOrders
-    }];
-
-    const topProductsData = this.topProducts.map(p => ({
-      Producto: p.productName,
-      Categoría: p.category,
-      Vendidos: p.sold,
-      Ingresos: `$${p.revenue}`
-    }));
-
-    const canalesData = this.channelData.map(c => ({
-      Canal: c.label,
-      Porcentaje: `${c.pct}%`
-    }));
-
-    this.exportService.exportCustomPDF('Resumen de Dashboard', [
-      { title: 'Resumen Ejecutivo del Mes', data: resumenData },
-      { title: 'Top 5 Productos', data: topProductsData },
-      { title: 'Canales de Venta', data: canalesData }
-    ], 'dashboard_onelove');
+    const html = `
+      <div style="margin-bottom: 20px;">
+        <h2>Resumen Ejecutivo del Mes</h2>
+        <ul>
+          <li>Ventas del Mes: $${this.stats.monthlySales} (${this.stats.salesGrowth}%)</li>
+          <li>Pedidos del Mes: ${this.stats.monthlyOrders} (${this.stats.ordersGrowth}%)</li>
+          <li>Total Clientes: ${this.stats.totalCustomers} (${this.stats.customersGrowth}%)</li>
+          <li>Pedidos Pendientes: ${this.stats.pendingOrders}</li>
+        </ul>
+      </div>
+      <div style="margin-bottom: 20px;">
+        <h2>Top 5 Productos</h2>
+        <table>
+          <tr><th>Producto</th><th>Categoría</th><th>Vendidos</th><th>Ingresos</th></tr>
+          ${this.topProducts.map(p => `<tr><td>${p.productName}</td><td>${p.category}</td><td>${p.sold}</td><td>$${p.revenue}</td></tr>`).join('')}
+        </table>
+      </div>
+      <div style="margin-bottom: 20px;">
+        <h2>Canales de Venta</h2>
+        <table>
+          <tr><th>Canal</th><th>Porcentaje</th></tr>
+          ${this.channelData.map(c => `<tr><td>${c.label}</td><td>${c.pct}%</td></tr>`).join('')}
+        </table>
+      </div>
+    `;
+    this.exportService.exportHTMLReport('Reporte de Dashboard', html, 'dashboard_onelove');
   }
 }
